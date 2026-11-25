@@ -1,0 +1,1871 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Monthly Expense</title>
+<meta name="description" content="Income, expenses and your independence factor, month by month.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Expenses">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EBEEF1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1014" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link id="app-fonts" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Public+Sans:wght@400;500;600&amp;display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;min-height:100vh}
+[hidden]{display:none!important}
+</style>
+<style id="app-css">
+*,*::before,*::after{box-sizing:border-box}
+html,body,div,section,header,footer,figure,figcaption,h1,h2,h3,p,ul,ol,li,table,thead,tbody,tr,th,td,form,fieldset,legend,input,select,button,label{margin:0;padding:0;border:0;font:inherit;color:inherit}
+ul,ol{list-style:none}
+table{border-collapse:collapse;width:100%}
+img,svg{display:block;max-width:100%}
+button{background:none;cursor:pointer}
+input,select,button{font-family:inherit;font-size:inherit}
+
+:root{
+  color-scheme:light;
+  --bg:#EBEEF1;
+  --surface:#FBFCFD;
+  --surface-2:#F1F4F7;
+  --surface-3:#E4E9ED;
+  --ink:#0E1519;
+  --ink-2:#4A5860;
+  --ink-3:#77868E;
+  --line:#D2DAE0;
+  --line-2:#B7C3CB;
+  --income:#00699C;
+  --expense:#B85F14;
+  --factor:#5B47B8;
+  --good:#0C7A24;
+  --warn:#8A5A00;
+  --crit:#C0272B;
+  --good-bg:#E2F1E4;
+  --warn-bg:#F7EEDC;
+  --crit-bg:#F8E6E6;
+  --hatch:rgba(255,255,255,.55);
+  --shadow:0 1px 2px rgba(14,21,25,.05), 0 8px 24px -18px rgba(14,21,25,.35);
+  --focus:#00699C;
+}
+@media (prefers-color-scheme:dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme:dark;
+    --bg:#0B1014;
+    --surface:#121A1F;
+    --surface-2:#18222A;
+    --surface-3:#1F2C35;
+    --ink:#E6EDF1;
+    --ink-2:#9EADB6;
+    --ink-3:#71818B;
+    --line:#22303A;
+    --line-2:#33454F;
+    --income:#3892BE;
+    --expense:#CC7C22;
+    --factor:#9A8AE8;
+    --good:#57C06B;
+    --warn:#E0A63C;
+    --crit:#E87272;
+    --good-bg:#132A18;
+    --warn-bg:#2B2213;
+    --crit-bg:#2C1618;
+    --hatch:rgba(11,16,20,.55);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.9);
+    --focus:#3892BE;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1014;
+  --surface:#121A1F;
+  --surface-2:#18222A;
+  --surface-3:#1F2C35;
+  --ink:#E6EDF1;
+  --ink-2:#9EADB6;
+  --ink-3:#71818B;
+  --line:#22303A;
+  --line-2:#33454F;
+  --income:#3892BE;
+  --expense:#CC7C22;
+  --factor:#9A8AE8;
+  --good:#57C06B;
+  --warn:#E0A63C;
+  --crit:#E87272;
+  --good-bg:#132A18;
+  --warn-bg:#2B2213;
+  --crit-bg:#2C1618;
+  --hatch:rgba(11,16,20,.55);
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.9);
+  --focus:#3892BE;
+}
+
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.display{font-family:"Archivo","Public Sans",sans-serif;letter-spacing:-.018em;text-wrap:balance}
+.num{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10.5px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
+}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+
+.wrap{max-width:1240px;margin:0 auto;padding-block:22px 56px;padding-left:max(20px, env(safe-area-inset-left, 0px));padding-right:max(20px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:18px}
+
+/* ---------- masthead ---------- */
+.masthead{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 22px;padding-bottom:16px;border-bottom:1px solid var(--line-2)}
+.brand{display:flex;flex-direction:column;gap:2px;margin-right:auto}
+.brand h1{font-size:22px;font-weight:700;line-height:1.1}
+.brand .eyebrow{color:var(--ink-3)}
+.subbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.period{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.views{display:flex;gap:3px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:3px;box-shadow:var(--shadow)}
+.views button{padding:6px 15px;border-radius:6px;font-size:13.5px;font-weight:600;color:var(--ink-3);transition:background .15s,color .15s}
+.views button:hover{color:var(--ink)}
+.views button[aria-current="page"]{background:var(--surface-3);color:var(--ink)}
+.stepper{display:flex;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:3px;box-shadow:var(--shadow)}
+.stepper button{width:30px;height:30px;border-radius:6px;color:var(--ink-2);display:grid;place-items:center;font-size:15px}
+.stepper button:hover{background:var(--surface-3);color:var(--ink)}
+.stepper .month{min-width:158px;text-align:center;font-weight:600;font-size:14px;padding:0 6px}
+.stepper .month small{display:block;font-size:10.5px;font-weight:500;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;font-family:"IBM Plex Mono",monospace}
+.ctrl{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;color:var(--ink);font-size:13.5px;box-shadow:var(--shadow)}
+select.ctrl{padding-right:8px}
+.status{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;letter-spacing:.02em;white-space:nowrap}
+.status .dot{width:7px;height:7px;border-radius:50%;background:var(--ink-3);flex:none}
+.status[data-s="saving"] .dot{background:var(--warn)}
+.status[data-s="saved"] .dot{background:var(--good)}
+.status[data-s="local"] .dot{background:var(--ink-3)}
+.status[data-s="error"]{color:var(--crit)}
+.status[data-s="error"] .dot{background:var(--crit)}
+
+/* ---------- panels ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.card-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:14px 16px 0}
+.card-hd h2{font-size:14.5px;font-weight:600}
+.card-hd p{font-size:12.5px;color:var(--ink-3)}
+
+/* ---------- hero ---------- */
+.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+.factor-panel{padding:18px 20px 20px;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden}
+.factor-top{display:flex;align-items:flex-end;gap:14px 24px;flex-wrap:wrap}
+.factor-read{display:flex;align-items:baseline;gap:5px}
+.factor-read .val{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:clamp(46px,7vw,68px);font-weight:500;line-height:.9;letter-spacing:-.04em;color:var(--factor)}
+.factor-read .x{font-family:"IBM Plex Mono",monospace;font-size:26px;color:var(--ink-3);font-weight:400}
+.verdict{display:inline-flex;align-items:center;gap:7px;padding:5px 11px 5px 9px;border-radius:999px;font-size:12.5px;font-weight:600;line-height:1.2}
+.verdict .mark{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600}
+.verdict[data-band="good"]{background:var(--good-bg);color:var(--good)}
+.verdict[data-band="warn"]{background:var(--warn-bg);color:var(--warn)}
+.verdict[data-band="crit"]{background:var(--crit-bg);color:var(--crit)}
+.verdict[data-band="none"]{background:var(--surface-3);color:var(--ink-3)}
+.factor-say{display:flex;flex-direction:column;align-items:flex-start;gap:9px;flex:1 1 250px;min-width:210px}
+.factor-note{font-size:12.5px;color:var(--ink-2);max-width:50ch}
+
+.balance{display:flex;flex-direction:column;gap:9px;padding-top:16px}
+.brow{display:grid;grid-template-columns:76px 1fr auto;align-items:center;gap:10px}
+.brow .lbl{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.chip{width:9px;height:9px;border-radius:2px;flex:none}
+.chip.inc{background:var(--income)}
+.chip.exp{background:var(--expense);background-image:repeating-linear-gradient(45deg,transparent 0 2px,var(--hatch) 2px 3px)}
+.track{position:relative;height:16px;background:var(--surface-3);border-radius:3px}
+.fill{position:absolute;inset:0 auto 0 0;border-radius:3px;transition:width .35s cubic-bezier(.22,.8,.3,1)}
+.fill.inc{background:var(--income)}
+.fill.exp{background:var(--expense);background-image:repeating-linear-gradient(45deg,transparent 0 3px,var(--hatch) 3px 4.5px)}
+.brow .amt{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:13px;font-weight:500;min-width:96px;text-align:right}
+.breakeven{position:absolute;top:-13px;bottom:-1px;width:0;border-left:1.5px dashed var(--ink);opacity:.8;transition:left .35s cubic-bezier(.22,.8,.3,1);pointer-events:none;z-index:2}
+.breakeven span{position:absolute;top:-4px;left:5px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.breakeven.flip span{left:auto;right:5px}
+.breakeven[hidden]{display:none}
+
+.tiles{display:grid;grid-template-rows:repeat(3,1fr);gap:14px}
+.tile{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.tile .k{display:flex;flex-direction:column;gap:1px}
+.tile .k b{font-size:13px;font-weight:600}
+.tile .k span{font-size:11.5px;color:var(--ink-3)}
+.tile .v{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:22px;font-weight:500;letter-spacing:-.02em;text-align:right}
+.v.inc{color:var(--income)}
+.v.exp{color:var(--expense)}
+.v.pos{color:var(--good)}
+.v.neg{color:var(--crit)}
+
+/* ---------- charts ---------- */
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chart-card{display:flex;flex-direction:column;padding-bottom:12px}
+/* SVG marks take their colour from the same tokens as the rest of the page, so
+   the charts re-theme themselves without being redrawn. */
+.viz{max-width:100%;height:auto}
+.viz text{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;fill:var(--ink-3)}
+.viz .grid{stroke:var(--line);stroke-width:1}
+.viz .axis-sel{fill:var(--ink);font-weight:600}
+.viz .bar-inc{fill:var(--income)}
+.viz .pat-base{fill:var(--expense)}
+.viz .pat-line{fill:var(--hatch)}
+.viz .rule{stroke:var(--ink-3);stroke-width:1.5;stroke-dasharray:5 4}
+.viz .rule-lbl{font-size:9.5px;letter-spacing:.09em}
+.viz .trend{fill:none;stroke:var(--factor);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.viz .dot{fill:var(--factor);stroke:var(--surface);stroke-width:2}
+.viz .inf{fill:var(--factor);font-size:13px}
+.viz .val{fill:var(--ink);font-size:11px;font-weight:600}
+.viz .hit{fill:transparent;cursor:pointer}
+.legend{display:flex;gap:14px;padding:9px 16px 2px}
+.legend .li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.plot{padding:2px 8px 0;min-height:210px}
+.tablink{font-size:11.5px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px;padding:0 16px;align-self:flex-start;margin-top:6px}
+.tablink:hover{color:var(--ink)}
+.datatable{padding:4px 16px 0;overflow-x:auto}
+.datatable[hidden]{display:none}
+.datatable table{font-size:12px;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;min-width:320px}
+.datatable th,.datatable td{padding:4px 10px 4px 0;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.datatable th:first-child,.datatable td:first-child{text-align:left}
+.datatable th{color:var(--ink-3);font-weight:500;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+
+/* ---------- lower ---------- */
+.lower{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+#viewOverview,#viewEntries{display:flex;flex-direction:column;gap:18px}
+#viewOverview[hidden],#viewEntries[hidden]{display:none}
+.cats{padding:0 16px 14px}
+.catrow{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.catrow:last-child{border-bottom:0}
+.catrow .cn{font-size:13px;grid-column:1}
+.catrow .cv{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:13px;grid-column:2;text-align:right}
+.catrow .cv em{font-style:normal;color:var(--ink-3);font-size:11.5px;margin-left:7px}
+.catbar{grid-column:1/-1;height:7px;background:var(--surface-3);border-radius:2px;overflow:hidden}
+.catbar i{display:block;height:100%;background:var(--expense);background-image:repeating-linear-gradient(45deg,transparent 0 3px,var(--hatch) 3px 4.5px);border-radius:2px}
+.catbar.inc i{background:var(--income);background-image:none}
+
+.ledger{display:flex;flex-direction:column}
+form.entry{display:grid;grid-template-columns:repeat(12,1fr);gap:12px 10px;padding:14px 16px 16px;border-bottom:1px solid var(--line);align-items:start}
+.seg{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:3px;gap:3px}
+.seg label{flex:1;position:relative}
+.seg input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.seg span{display:block;text-align:center;padding:7px 4px;border-radius:5px;font-size:13px;font-weight:600;color:var(--ink-3);transition:background .15s,color .15s}
+/* The selected side is underlined in the colour it owns in every chart. */
+.seg label:first-child input:checked+span{background:var(--surface);color:var(--ink);box-shadow:inset 0 -2px 0 var(--expense)}
+.seg label:last-child input:checked+span{background:var(--surface);color:var(--ink);box-shadow:inset 0 -2px 0 var(--income)}
+.seg input:focus-visible+span{outline:2px solid var(--focus);outline-offset:1px}
+.f{display:flex;flex-direction:column;gap:4px}
+/* Direct children only: the type field wraps a .seg whose own labels and radios
+   must not inherit the field-label or text-input treatment. */
+.f > label{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.f > input,.f > select{background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:7px 9px;font-size:13.5px;width:100%}
+.f > input:hover,.f > select:hover{border-color:var(--line-2)}
+.f-type{grid-column:span 2}
+.f-date{grid-column:span 2}
+.f-cat{grid-column:span 3}
+.f-note{grid-column:span 3}
+.f-amt{grid-column:span 2}
+.f-act{grid-column:span 12;display:flex;gap:8px;align-items:center;padding-top:2px}
+/* Validation speaks in the page's own voice, so the form is novalidate and the
+   browser's native bubble never appears. */
+.f .msg{font-size:11.5px;line-height:1.35;color:var(--crit);display:none}
+.f.err .msg{display:block}
+/* The native date picker renders in the browser's own locale; this echo states
+   the date in Canadian English so it is never ambiguous. */
+.f .hint{font-size:11.5px;line-height:1.35;color:var(--ink-3)}
+.f.err .hint{display:none}
+.f.err > input{border-color:var(--crit);background:var(--crit-bg)}
+.btn{border:1px solid var(--line-2);border-radius:8px;padding:8px 14px;font-size:13.5px;font-weight:600;background:var(--surface-2);transition:background .15s,border-color .15s}
+.btn:hover{background:var(--surface-3);border-color:var(--ink-3)}
+.btn.primary{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.btn.primary:hover{opacity:.88}
+.btn.ghost{border-color:transparent;background:none;color:var(--ink-3);padding:8px 6px;font-weight:500}
+.btn.ghost:hover{color:var(--ink);background:var(--surface-2)}
+
+.rows{max-height:min(62vh,620px);overflow:auto}
+.rows table{font-size:13.5px}
+.rows th{position:sticky;top:0;background:var(--surface);z-index:1;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:500;text-align:left;padding:9px 16px;border-bottom:1px solid var(--line)}
+.rows td{padding:8px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+.rows tr:last-child td{border-bottom:0}
+.rows tr:hover td{background:var(--surface-2)}
+.rows .d{font-family:"IBM Plex Mono",monospace;color:var(--ink-3);font-size:12px;white-space:nowrap;width:1%}
+.rows .desc b{font-weight:600;display:block;font-size:13.5px}
+.rows .desc span{font-size:11.5px;color:var(--ink-3)}
+.rows .desc .dm{display:none;font-style:normal}
+.rows .desc .nosub{display:none}
+.rows .a{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;width:1%;font-weight:500}
+.rows .x{width:1%;text-align:right;white-space:nowrap}
+.rowbtn{color:var(--ink-3);padding:2px 5px;border-radius:5px;font-size:12px}
+.rowbtn:hover{color:var(--ink);background:var(--surface-3)}
+.rowbtn.del:hover{color:var(--crit);background:var(--crit-bg)}
+
+.empty{padding:34px 20px;text-align:center;color:var(--ink-3);font-size:13.5px;display:flex;flex-direction:column;gap:10px;align-items:center}
+.empty b{color:var(--ink-2);font-weight:600;font-size:14px}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:2px 0 0}
+.toolbar .sp{margin-left:auto}
+footer.foot{font-size:12px;color:var(--ink-3);line-height:1.7;border-top:1px solid var(--line);padding-top:14px;max-width:78ch}
+footer.foot b{color:var(--ink-2);font-weight:600}
+
+/* Sandboxed frames suppress window.confirm(), so destructive actions ask here. */
+.modal{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;background:rgba(9,13,16,.55);backdrop-filter:blur(2px)}
+.modal[hidden]{display:none}
+.modal-card{background:var(--surface);border:1px solid var(--line-2);border-radius:13px;box-shadow:0 24px 60px -20px rgba(0,0,0,.6);padding:20px;max-width:400px;width:100%;display:flex;flex-direction:column;gap:9px}
+.modal-card h2{font-size:16px;font-weight:700}
+.modal-card p{font-size:13.5px;color:var(--ink-2);line-height:1.55}
+.modal-act{display:flex;gap:8px;justify-content:flex-end;padding-top:7px}
+.btn.danger{background:var(--crit);border-color:var(--crit);color:#fff}
+.btn.danger:hover{background:var(--crit);border-color:var(--crit);opacity:.88}
+#tip{position:fixed;z-index:60;pointer-events:none;opacity:0;transform:translate(-50%,-118%);transition:opacity .12s;background:var(--ink);color:var(--bg);border-radius:8px;padding:8px 11px;font-size:12px;line-height:1.55;box-shadow:0 8px 26px -12px rgba(0,0,0,.7);white-space:nowrap}
+#tip.on{opacity:1}
+#tip .th{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.65;margin-bottom:3px}
+#tip .tr{display:flex;gap:14px;justify-content:space-between;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace}
+#tip .tr span:first-child{opacity:.75}
+
+@media (max-width:940px){
+  .hero,.charts,.lower{grid-template-columns:1fr}
+  .tiles{grid-template-rows:none;grid-template-columns:repeat(3,1fr)}
+  .f-type{grid-column:span 12}
+  .f-date{grid-column:span 4}
+  .f-cat{grid-column:span 8}
+  .f-note{grid-column:span 7}
+  .f-amt{grid-column:span 5}
+}
+@media (max-width:620px){
+  .wrap{padding-block:14px 96px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));gap:14px}
+  .masthead{gap:10px 12px;padding-bottom:12px}
+  .brand{width:100%}
+  .subbar,.period{gap:8px;width:100%}
+  .views,.stepper{flex:1 1 auto}
+  .views button{flex:1;min-height:38px}
+  .stepper button{width:40px;height:38px}
+  .stepper .month{min-width:0;flex:1}
+  .tiles{grid-template-columns:1fr;gap:10px}
+  .tile .v{font-size:19px}
+  /* On a phone the amount is what you type first, so it leads the form. */
+  .f-type{order:1}
+  .f-amt{order:2;grid-column:span 6}
+  .f-date{order:3;grid-column:span 6}
+  .f-cat{order:4;grid-column:span 12}
+  .f-note{order:5;grid-column:span 12}
+  .f-act{order:6;flex-wrap:wrap}
+  .f-act .btn.primary{flex:1 1 auto;padding:12px 14px;font-size:15px}
+  #copyPrev{margin-left:0!important}
+  /* 16px stops iOS Safari zooming the page when a field takes focus. */
+  .f > input,.f > select,.ctrl,.xfer-box{font-size:16px}
+  .f > input{padding:10px 11px;min-height:44px}
+  .seg span{padding:9px 4px;font-size:14px}
+  .rows{max-height:none}
+  .rows th,.rows td{padding-left:10px;padding-right:10px}
+  .rows th:first-child,.rows td.d{display:none}
+  .rows .desc .dm{display:inline}
+  .rows .desc .nosub{display:block}
+  .rows td.x{padding-left:0;padding-right:4px}
+  .rows td{padding-top:10px;padding-bottom:10px}
+  .rowbtn{padding:7px 9px;font-size:13px}
+  .modal{align-items:end;padding:12px max(12px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px))}
+  .modal-card{max-height:calc(100% - 12px);overflow:auto}
+  .toolbar .sp{margin-left:0}
+}
+/* ---------- quick category picks ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding-top:4px}
+.chips:empty{display:none}
+.chip-btn{border:1px solid var(--line);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:500;line-height:1.3}
+.chip-btn:hover{border-color:var(--line-2);color:var(--ink)}
+.chip-btn[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);background:var(--surface-3)}
+
+/* ---------- move data dialog ---------- */
+.modal-card.wide{max-width:560px;gap:12px}
+.xfer{display:flex;flex-direction:column;gap:10px}
+.xfer-step{display:flex;flex-direction:column;gap:8px;padding:13px 14px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px}
+.xfer-step h3{font-size:13.5px;font-weight:600}
+.xfer-step p{font-size:12.5px;color:var(--ink-2)}
+.xfer-act{display:flex;flex-wrap:wrap;gap:8px}
+.xfer-box{width:100%;resize:vertical;min-height:64px;background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:8px 9px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;color:var(--ink)}
+.xfer-msg{font-size:12.5px;color:var(--ink-2);min-height:1.2em}
+.xfer-msg[data-kind="good"]{color:var(--good)}
+.xfer-msg[data-kind="bad"]{color:var(--crit)}
+
+/* ---------- phone extras ---------- */
+.fab{display:none;position:fixed;z-index:40;right:calc(16px + env(safe-area-inset-right, 0px));bottom:calc(18px + env(safe-area-inset-bottom, 0px));align-items:center;gap:6px;padding:13px 20px;border-radius:999px;background:var(--ink);color:var(--surface);font-weight:600;font-size:15px;box-shadow:0 10px 28px -10px rgba(0,0,0,.55)}
+.fab[hidden]{display:none!important}
+.toast{position:fixed;z-index:70;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom, 0px));display:flex;align-items:center;gap:14px;background:var(--ink);color:var(--surface);border-radius:10px;padding:10px 12px 10px 16px;font-size:13.5px;box-shadow:0 12px 30px -12px rgba(0,0,0,.6);max-width:calc(100% - 32px)}
+.toast button{color:var(--surface);font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:4px 6px}
+.welcome{display:flex;flex-direction:column;gap:10px;align-items:center}
+.welcome .xfer-act{justify-content:center}
+@media (max-width:620px){ .fab{display:inline-flex} }
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">
+      <span class="eyebrow">Income ÷ expenses, month by month</span>
+      <h1>Independence Ledger</h1>
+    </div>
+    <select class="ctrl" id="currency" aria-label="Currency"></select>
+    <div class="status" id="status" data-s="local"><span class="dot"></span><span id="statusText">Ready</span></div>
+  </header>
+
+  <nav class="subbar">
+    <div class="views" id="pageTabs" role="tablist">
+      <button type="button" data-view="overview" aria-current="page">Overview</button>
+      <button type="button" data-view="entries">Entries</button>
+    </div>
+    <div class="period">
+      <div class="views" id="scopeTabs" role="tablist" aria-label="Summarise by">
+        <button type="button" data-scope="month" aria-current="page">Month</button>
+        <button type="button" data-scope="quarter">Quarter</button>
+        <button type="button" data-scope="year">Year</button>
+      </div>
+      <div class="stepper">
+        <button type="button" id="prev" aria-label="Previous period">←</button>
+        <div class="month" id="periodLabel">—<small id="periodSub"></small></div>
+        <button type="button" id="next" aria-label="Next period">→</button>
+      </div>
+    </div>
+  </nav>
+
+  <div id="viewOverview">
+  <section class="hero">
+    <div class="card factor-panel">
+      <div class="factor-top">
+        <div>
+          <div class="eyebrow" style="margin-bottom:8px">Independence factor</div>
+          <div class="factor-read"><span class="val num" id="ifVal">—</span><span class="x">×</span></div>
+        </div>
+        <div class="factor-say">
+          <span class="verdict" id="verdict" data-band="none"><span class="mark">—</span><span id="verdictText">No data yet</span></span>
+          <p class="factor-note" id="ifNote">Add this month's income and expenses to see how many times over your income covers your spending.</p>
+        </div>
+      </div>
+      <div class="balance" id="balance">
+        <div class="brow">
+          <span class="lbl"><i class="chip inc"></i>Income</span>
+          <div class="track">
+            <div class="fill inc" id="fillInc" style="width:0"></div>
+            <div class="breakeven" id="breakeven" hidden=""><span>break-even</span></div>
+          </div>
+          <span class="amt" id="amtInc">—</span>
+        </div>
+        <div class="brow">
+          <span class="lbl"><i class="chip exp"></i>Expenses</span>
+          <div class="track"><div class="fill exp" id="fillExp" style="width:0"></div></div>
+          <span class="amt" id="amtExp">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="tiles">
+      <div class="card tile"><div class="k"><b>Income</b><span id="incCount">—</span></div><div class="v inc num" id="tIncome">—</div></div>
+      <div class="card tile"><div class="k"><b>Expenses</b><span id="expCount">—</span></div><div class="v exp num" id="tExpense">—</div></div>
+      <div class="card tile"><div class="k"><b>Net</b><span id="netSub">kept this month</span></div><div class="v num" id="tNet">—</div></div>
+    </div>
+  </section>
+
+  <section class="charts">
+    <figure class="card chart-card">
+      <div class="card-hd"><h2>Income and expenses</h2><p id="rangeLabel">Last 12 months</p></div>
+      <div class="legend">
+        <span class="li"><i class="chip inc"></i>Income</span>
+        <span class="li"><i class="chip exp"></i>Expenses</span>
+      </div>
+      <div class="plot" id="plotBars"></div>
+      <button type="button" class="tablink" data-table="tableBars">Show data table</button>
+      <div class="datatable" id="tableBars" hidden=""></div>
+    </figure>
+    <figure class="card chart-card">
+      <div class="card-hd"><h2>Independence factor</h2><p>1.0× = income exactly covers expenses</p></div>
+      <div class="plot" id="plotFactor"></div>
+      <button type="button" class="tablink" data-table="tableFactor">Show data table</button>
+      <div class="datatable" id="tableFactor" hidden=""></div>
+    </figure>
+  </section>
+
+  <section class="lower">
+    <div class="card">
+      <div class="card-hd"><h2>Where it went</h2><p id="expHint">Expenses by category</p></div>
+      <div class="cats" id="catsExp"></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><h2>Where it came from</h2><p id="incHint">Income by source</p></div>
+      <div class="cats" id="catsInc"></div>
+    </div>
+  </section>
+  </div>
+
+  <div id="viewEntries" hidden="">
+    <div class="card ledger">
+      <div class="card-hd"><h2 id="ledgerTitle">Entries</h2><p id="ledgerCount"></p></div>
+      <form class="entry" id="entryForm" autocomplete="off" novalidate="">
+        <div class="f f-type">
+          <label id="typeLabel">Type</label>
+          <div class="seg" role="radiogroup" aria-labelledby="typeLabel">
+            <label><input type="radio" name="type" value="expense" checked=""><span>Expense</span></label>
+            <label><input type="radio" name="type" value="income"><span>Income</span></label>
+          </div>
+        </div>
+        <div class="f f-date"><label for="fDate">Date</label><input type="date" id="fDate"><small class="hint" id="dateEcho"></small><small class="msg" id="errDate"></small></div>
+        <div class="f f-cat"><label for="fCat">Category</label><input type="text" id="fCat" list="catList" placeholder="Housing" autocapitalize="words" enterkeyhint="next"><datalist id="catList"></datalist><small class="msg" id="errCat"></small><div class="chips" id="catChips" aria-label="Frequent categories"></div></div>
+        <div class="f f-note"><label for="fNote">Note <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input type="text" id="fNote" placeholder="September rent" autocapitalize="sentences" enterkeyhint="done"></div>
+        <div class="f f-amt"><label for="fAmt">Amount</label><input type="text" id="fAmt" inputmode="decimal" placeholder="0.00" enterkeyhint="next"><small class="msg" id="errAmt"></small></div>
+        <div class="f-act">
+          <button type="submit" class="btn primary" id="submitBtn">Add entry</button>
+          <button type="button" class="btn ghost" id="cancelEdit" hidden="">Cancel</button>
+          <button type="button" class="btn ghost" id="copyPrev" style="margin-left:auto">Copy previous month</button>
+        </div>
+      </form>
+      <div class="rows" id="rows"></div>
+    </div>
+
+    <div class="toolbar">
+      <button type="button" class="btn" id="transferBtn">Move data between devices</button>
+      <button type="button" class="btn" id="exportCsv">Export CSV</button>
+      <button type="button" class="btn ghost sp" id="sampleBtn">Load example data</button>
+      <button type="button" class="btn ghost" id="clearAll">Clear everything</button>
+    </div>
+  </div>
+
+  <div class="modal" id="transfer" hidden="">
+    <div class="modal-card wide" role="dialog" aria-modal="true" aria-labelledby="transferTitle">
+      <h2 id="transferTitle">Move data between devices</h2>
+      <p id="transferIntro">Your ledger can live in two places: the Claude page and the iPhone app. Moving data merges entry by entry, so the newer edit wins and deletions carry over. Nothing is overwritten wholesale.</p>
+      <div class="xfer">
+        <section class="xfer-step">
+          <h3>Send from this device</h3>
+          <p>Copy everything, then paste it on the other device. Copy on a Mac and paste on an iPhone works through Universal Clipboard.</p>
+          <div class="xfer-act">
+            <button type="button" class="btn primary" id="xCopy">Copy data</button>
+            <button type="button" class="btn" id="xSave">Save backup file</button>
+          </div>
+          <textarea id="xOut" class="xfer-box" rows="3" readonly="" hidden="" aria-label="Your data, ready to copy"></textarea>
+        </section>
+        <section class="xfer-step">
+          <h3>Receive on this device</h3>
+          <p>Paste what you copied on the other device, or pick a backup file.</p>
+          <textarea id="xIn" class="xfer-box" rows="3" placeholder="Paste data here" aria-label="Paste data from the other device"></textarea>
+          <div class="xfer-act">
+            <button type="button" class="btn primary" id="xMerge">Merge pasted data</button>
+            <button type="button" class="btn" id="xFile">Choose backup file</button>
+            <input type="file" id="importFile" accept="application/json,.json,text/plain" hidden="">
+          </div>
+          <p class="xfer-msg" id="xMsg" role="status"></p>
+        </section>
+      </div>
+      <div class="modal-act">
+        <button type="button" class="btn" id="xClose">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal" hidden="">
+    <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalBody">
+      <h2 id="modalTitle">Are you sure?</h2>
+      <p id="modalBody"></p>
+      <div class="modal-act">
+        <button type="button" class="btn" id="modalCancel">Cancel</button>
+        <button type="button" class="btn danger" id="modalOk">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot" id="foot">
+    <b>Where your numbers live.</b> <span id="footText">Entries are saved to this page's private database, so they appear wherever you open this link while signed in to Claude.</span>
+  </footer>
+</div>
+<button type="button" class="fab" id="fab" aria-label="Add an entry">+ Add</button>
+<div class="toast" id="toast" hidden=""><span id="toastText"></span><button type="button" id="toastBtn">Undo</button></div>
+<div id="tip" role="status" aria-live="polite"></div>
+<script id="app-js">
+(function(){
+  "use strict";
+  /* One codebase, two homes:
+     - inside Claude (an artifact), entries live in the page's private database;
+     - as the standalone iPhone app, entries live in the app's own storage.
+     Either way the screen updates the instant you save; the write itself
+     happens behind it. Every entry carries the time it was last changed and a
+     deletion leaves a small marker, so two copies can be merged safely. */
+  var HOSTED = !!(window.claude && typeof window.claude.use === "function");
+  var LOCAL_KEY = "independence-ledger-v2";       // full ledger (app) / fast-start cache (Claude page)
+  var LEGACY_KEY = "independence-ledger-v1";      // what the previous version kept in this browser
+  var OUTBOX_KEY = "independence-ledger-outbox";  // writes not yet confirmed by the database
+  var PLACE_KEY = "independence-ledger-place";
+  // Every date and amount on this page is rendered in Canadian English, pinned
+  // here rather than taken from the viewer's browser or OS locale.
+  var LOCALE = "en-CA";
+  var CURRENCIES = ["USD","EUR","GBP","JPY","CAD","AUD","CHF","CNY","HKD","INR","IDR","KRW","MXN","MYR","NGN","NOK","NZD","PHP","PLN","SEK","SGD","THB","TRY","VND","ZAR","BRL","AED"];
+  var CATS = {
+    expense: ["Housing","Food & groceries","Transport","Utilities","Health","Insurance","Debt payments","Subscriptions","Dining & fun","Shopping","Education","Travel","Other"],
+    income: ["Salary","Freelance","Business","Investments","Rental","Bonus","Gifts","Other"]
+  };
+  var ID_RE = /^[A-Za-z0-9_~:@+-]{1,64}$/;   // safe as a database document id
+
+  /* ---------------- storage helpers ---------------- */
+  function lsGet(k){ try { return JSON.parse(window.localStorage.getItem(k) || "null"); } catch(e){ return null; } }
+  function lsSet(k, v){ try { window.localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
+
+  /* ---------------- state ---------------- */
+  var state = readLocal();
+  var selMonth = defaultMonth();
+  var editingId = null;
+  var downloadsApi = null;
+  var booting = HOSTED && !state.entries.length;   // waiting on the database's first answer
+
+  function readLocal(){
+    var s = lsGet(LOCAL_KEY);
+    if (s && Array.isArray(s.entries)) return normalize(s);
+    // The previous version of the Claude page kept a copy in this browser;
+    // use it so the first frame shows your numbers while the database loads.
+    var old = lsGet(LEGACY_KEY);
+    if (HOSTED && old && Array.isArray(old.entries)) return normalize(old);
+    return normalize({});
+  }
+  function saveLocal(){
+    lsSet(LOCAL_KEY, { v: 2, currency: state.currency, currencyAt: state.currencyAt, entries: state.entries, gone: state.gone });
+  }
+  // Accepts this version's data, a pasted transfer, or an older backup file.
+  function normalize(s){
+    s = s && typeof s === "object" ? s : {};
+    var out = { currency: CURRENCIES.indexOf(s.currency) >= 0 ? s.currency : "USD",
+                currencyAt: +s.currencyAt || 0, entries: [], gone: {} };
+    var live = {};
+    function tomb(id, t){
+      id = String(id || ""); t = +t || 0;
+      if (!ID_RE.test(id)) return;
+      if (!(out.gone[id] >= t)) out.gone[id] = t;
+    }
+    (Array.isArray(s.entries) ? s.entries : []).forEach(function(e){
+      if (e && e.deleted){ tomb(e.id, e.updatedAt); return; }
+      if (!validEntry(e)) return;
+      var c = cleanEntry(e);
+      if (live[c.id] && live[c.id].updatedAt >= c.updatedAt) return;
+      live[c.id] = c;
+    });
+    if (s.gone && typeof s.gone === "object") Object.keys(s.gone).forEach(function(id){ tomb(id, s.gone[id]); });
+    if (Array.isArray(s.deleted)) s.deleted.forEach(function(d){ if (d) tomb(d.id, d.updatedAt); });
+    Object.keys(live).forEach(function(id){
+      var g = out.gone[id];
+      if (g !== undefined && g >= live[id].updatedAt) return;   // deleted after its last edit
+      delete out.gone[id];
+      out.entries.push(live[id]);
+    });
+    return out;
+  }
+  function validEntry(e){ return e && typeof e === "object" && typeof e.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && isFinite(+e.amount); }
+  function cleanEntry(e){
+    var id = String(e.id || "");
+    return {
+      id: ID_RE.test(id) ? id : uid(),
+      date: e.date,
+      type: e.type === "income" ? "income" : "expense",
+      category: String(e.category || "Other").slice(0,60),
+      note: String(e.note || "").slice(0,140),
+      amount: Math.max(0, Math.round(Math.abs(+e.amount) * 100) / 100),
+      updatedAt: Math.max(0, +e.updatedAt || 0)
+    };
+  }
+  function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
+  var lastStamp = 0;
+  function stamp(){ var t = Date.now(); lastStamp = t > lastStamp ? t : lastStamp + 1; return lastStamp; }
+  function findEntry(id){
+    for (var i=0;i<state.entries.length;i++) if (state.entries[i].id === id) return state.entries[i];
+    return null;
+  }
+
+  /* A change is a list of records: a whole entry, or {id, deleted, updatedAt}.
+     Apply locally, repaint, then hand the records to whichever store is live. */
+  function applyRecord(target, rec){
+    var i, list = target.entries;
+    for (i=0;i<list.length;i++) if (list[i].id === rec.id) break;
+    if (rec.deleted){
+      if (i < list.length) list.splice(i, 1);
+      target.gone[rec.id] = rec.updatedAt;
+    } else {
+      if (i < list.length) list[i] = rec; else list.push(rec);
+      delete target.gone[rec.id];
+    }
+  }
+  function commit(recs){
+    if (!recs.length) return;
+    recs.forEach(function(r){ applyRecord(state, r); });
+    saveLocal();
+    if (HOSTED) queueWrites(recs);
+    updateSaveStatus();
+  }
+
+  function defaultMonth(){
+    var latest = null;
+    for (var i=0;i<state.entries.length;i++){ var m = state.entries[i].date.slice(0,7); if (!latest || m > latest) latest = m; }
+    var now = ymOf(new Date());
+    return latest && latest > now ? latest : now;
+  }
+  function ymOf(d){ return d.getFullYear() + "-" + pad(d.getMonth()+1); }
+  function pad(n){ return n < 10 ? "0"+n : ""+n; }
+  function addMonths(ym, n){
+    var y = +ym.slice(0,4), m = +ym.slice(5,7) - 1 + n;
+    y += Math.floor(m/12); m = ((m % 12) + 12) % 12;
+    return y + "-" + pad(m+1);
+  }
+  // An entry's date is a plain calendar day, so every Date here is built AND
+  // formatted in the viewer's own local time. Mixing the two (a UTC instant
+  // shown locally, or vice versa) shifts days across the midnight boundary.
+  function localDay(iso){ return new Date(+iso.slice(0,4), +iso.slice(5,7)-1, +iso.slice(8,10)); }
+  function localMonth(ym){ return new Date(+ym.slice(0,4), +ym.slice(5,7)-1, 1); }
+  function todayISO(){
+    var d = new Date();
+    return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
+  }
+  function monthName(ym, style){
+    return localMonth(ym).toLocaleDateString(LOCALE, { month: style || "long", year: "numeric" });
+  }
+  function monthAbbr(ym){
+    return localMonth(ym).toLocaleDateString(LOCALE, { month: "short" });
+  }
+  // The stepper shows the year on its own line, so it asks for the month alone.
+  function monthOnly(ym){
+    return localMonth(ym).toLocaleDateString(LOCALE, { month: "long" });
+  }
+  function dayLabel(iso){
+    return localDay(iso).toLocaleDateString(LOCALE, { day: "numeric", month: "short" });
+  }
+  function fullDate(iso){
+    return localDay(iso).toLocaleDateString(LOCALE, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  }
+
+  /* ---------------- money ---------------- */
+  var fmtFull, fmtShort, fmtScaled;
+  function buildFormatters(){
+    var c = state.currency;
+    fmtFull = numberFormat({ style:"currency", currency:c, maximumFractionDigits:2 }, { maximumFractionDigits:2 });
+    fmtShort = numberFormat({ style:"currency", currency:c, maximumFractionDigits:0 }, { maximumFractionDigits:0 });
+    fmtScaled = numberFormat({ style:"currency", currency:c, minimumFractionDigits:0, maximumFractionDigits:1 }, { maximumFractionDigits:1 });
+  }
+  function numberFormat(opts, fallback){
+    try { return new Intl.NumberFormat(LOCALE, opts); }
+    catch(e){ return new Intl.NumberFormat(LOCALE, fallback); }
+  }
+  function money(n){ return fmtFull.format(n || 0); }
+  // Axis labels: compact the magnitude, keep the currency symbol wherever the
+  // locale puts it by appending the suffix to the last run of digits.
+  function moneyShort(n){
+    var a = Math.abs(n || 0);
+    if (a >= 1000000) return suffix(fmtScaled.format(n/1000000), "M");
+    if (a >= 1000) return suffix(fmtScaled.format(n/1000), "k");
+    return fmtShort.format(n || 0);
+  }
+  function suffix(s, unit){ return s.replace(/(\d)(?!.*\d)/, "$1" + unit); }
+
+  /* ---------------- periods ----------------
+     Everything summarises a range of months. One anchor month plus a scope
+     defines that range, so month, quarter and year share the same machinery:
+     only the step between periods and how many to chart on the axis differ. */
+  var SCOPES = {
+    month:   { step: 1,  buckets: 12 },
+    quarter: { step: 3,  buckets: 8  },
+    year:    { step: 12, buckets: 5  }
+  };
+  var scope = "month";
+  function quarterOf(ym){ return Math.floor((+ym.slice(5,7) - 1) / 3) + 1; }
+  function rangeOf(sc, ym){
+    var y = ym.slice(0,4);
+    if (sc === "year") return { start: y + "-01", end: y + "-12" };
+    if (sc === "quarter"){
+      var first = (quarterOf(ym) - 1) * 3 + 1;
+      return { start: y + "-" + pad(first), end: y + "-" + pad(first + 2) };
+    }
+    return { start: ym, end: ym };
+  }
+  function currentRange(){ return rangeOf(scope, selMonth); }
+  function periodTitle(sc, ym){          // "September 2026" | "Q3 2026" | "2026"
+    if (sc === "year") return ym.slice(0,4);
+    if (sc === "quarter") return "Q" + quarterOf(ym) + " " + ym.slice(0,4);
+    return monthName(ym);
+  }
+  function periodTick(sc, ym){           // chart axis label
+    if (sc === "year") return ym.slice(0,4);
+    if (sc === "quarter") return "Q" + quarterOf(ym);
+    return monthAbbr(ym);
+  }
+  function periodCompact(sc, ym){        // the "x to y" caption over a chart
+    if (sc === "quarter") return "Q" + quarterOf(ym) + " " + ym.slice(0,4);
+    if (sc === "year") return ym.slice(0,4);
+    return monthName(ym, "short");
+  }
+  function windowBuckets(){
+    var cfg = SCOPES[scope], out = [];
+    for (var i=cfg.buckets-1;i>=0;i--){
+      var anchor = addMonths(selMonth, -i * cfg.step), r = rangeOf(scope, anchor);
+      out.push({ anchor: anchor, start: r.start, end: r.end,
+                 tick: periodTick(scope, anchor), title: periodTitle(scope, anchor) });
+    }
+    return out;
+  }
+
+  /* ---------------- derived ---------------- */
+  function totalsFor(r){
+    var inc = 0, exp = 0, ic = 0, ec = 0;
+    for (var i=0;i<state.entries.length;i++){
+      var e = state.entries[i], m = e.date.slice(0,7);
+      if (m < r.start || m > r.end) continue;
+      if (e.type === "income"){ inc += e.amount; ic++; } else { exp += e.amount; ec++; }
+    }
+    return { income: inc, expense: exp, net: inc - exp, incCount: ic, expCount: ec, factor: factorOf(inc, exp) };
+  }
+  function factorOf(inc, exp){
+    if (exp > 0) return inc / exp;
+    if (inc > 0) return Infinity;
+    return null;
+  }
+  // `n` is the period noun, so the same verdicts read correctly whether you are
+  // looking at a month, a quarter or a year.
+  function band(f, n){
+    if (f === null) return { key:"none", mark:"—", text:"No data yet", note:"Add this " + n + "'s income and expenses to see how many times over your income covers your spending." };
+    if (f === Infinity) return { key:"good", mark:"∞", text:"No expenses logged", note:"Income with nothing spent against it. Log this " + n + "'s expenses for a meaningful ratio." };
+    if (f < 1) return { key:"crit", mark:"↓", text:"Shortfall", note:"Income covered " + Math.round(f*100) + "% of what you spent. The remaining " + Math.round((1-f)*100) + "% came out of savings." };
+    if (f < 1.2) return { key:"warn", mark:"≈", text:"Break-even", note:"Income cleared expenses by only " + Math.round((f-1)*100) + "%. One unplanned bill would tip the " + n + " negative." };
+    if (f < 2) return { key:"good", mark:"↑", text:"Covered", note:"You lived on " + Math.round(100/f) + "% of what you earned, banking " + (f-1).toFixed(2) + " " + n + "s of expenses this " + n + "." };
+    return { key:"good", mark:"↑↑", text:"Independent", note:"You lived on " + Math.round(100/f) + "% of what you earned. Every " + n + " at this rate banks another " + (f-1).toFixed(2) + " " + n + "s of expenses." };
+  }
+
+  /* ---------------- status ---------------- */
+  var flashUntil = 0, flashTimer = null;
+  function setStatus(kind, text){
+    var el = document.getElementById("status");
+    el.setAttribute("data-s", kind);
+    document.getElementById("statusText").textContent = text;
+  }
+  function flashStatus(msg){
+    setStatus(document.getElementById("status").getAttribute("data-s"), msg);
+    flashUntil = Date.now() + 2600;
+    if (flashTimer) clearTimeout(flashTimer);
+    flashTimer = setTimeout(function(){ flashUntil = 0; updateSaveStatus(); }, 2600);
+  }
+  function updateSaveStatus(){
+    if (Date.now() < flashUntil) return;
+    if (!HOSTED){ setStatus("saved", "Saved on this device"); return; }
+    if (remoteState === "connecting"){ setStatus("saving", "Connecting…"); return; }
+    if (remoteState === "off"){ setStatus("local", "Saved in this browser only"); return; }
+    var pending = Object.keys(outbox).length;
+    if (writeError && pending){ setStatus("error", writeError); return; }
+    if (pending){ setStatus("saving", pending > 1 ? "Saving " + pending + "…" : "Saving…"); return; }
+    setStatus("saved", "Saved");
+  }
+
+  /* ---------------- database (inside Claude) ----------------
+     Each entry is its own small document, so saving one entry is one small
+     write: no republishing the page, no reload. Writes go through an outbox
+     kept in this browser, so nothing typed is lost if the connection drops;
+     they are retried until the database confirms them. */
+  var db = null;
+  var remoteState = HOSTED ? "connecting" : "off";
+  var outbox = HOSTED ? (lsGet(OUTBOX_KEY) || {}) : {};
+  var queue = Object.keys(outbox), inflight = {}, inflightCount = 0, attempts = {};
+  var writeError = "";
+  var MAX_INFLIGHT = 4;
+  function saveOutbox(){ lsSet(OUTBOX_KEY, outbox); }
+  function queueWrites(recs){
+    recs.forEach(function(r){ outbox[r.id] = r; queue.push(r.id); });
+    saveOutbox();
+    pump();
+  }
+  function pump(){
+    if (!db) return;
+    while (inflightCount < MAX_INFLIGHT && queue.length){
+      var id = queue.shift();
+      if (!outbox[id] || inflight[id]) continue;   // done already, or re-queued when it lands
+      send(id, outbox[id]);
+    }
+  }
+  function send(id, rec){
+    inflight[id] = true; inflightCount++;
+    var body = rec.deleted ? { id: id, deleted: true, updatedAt: rec.updatedAt } : rec;
+    var p;
+    try { p = db.doc("entries/" + id).set(body); }
+    catch(e){ p = Promise.reject({ code: "invalid_argument" }); }
+    p.then(function(){
+      done();
+      delete attempts[id];
+      if (outbox[id] === rec){ delete outbox[id]; saveOutbox(); }
+      else if (outbox[id]) queue.push(id);          // edited again while this was in flight
+      if (!Object.keys(outbox).length) writeError = "";
+      pump(); updateSaveStatus();
+    }, function(err){
+      done();
+      var code = err && err.code;
+      if (code === "quota_exceeded"){
+        writeError = "Database full — kept in this browser";
+      } else if (code === "not_granted" || code === "revoked" || code === "invalid_argument" || code === "capability_disabled" || code === "capability_removed"){
+        writeError = "Can't save here — kept in this browser";
+      } else {
+        // Transient: retry with backoff. The entry is already on screen and in the outbox.
+        var n = attempts[id] = (attempts[id] || 0) + 1;
+        if (n > 2) writeError = "Offline — will save when back";
+        setTimeout(function(){ queue.push(id); pump(); }, Math.min(30000, 600 * Math.pow(2, n)) + Math.random() * 400);
+      }
+      updateSaveStatus();
+    });
+    function done(){ delete inflight[id]; inflightCount--; }
+  }
+  window.addEventListener("online", function(){ attempts = {}; queue = queue.concat(Object.keys(outbox)); pump(); });
+
+  function connect(){
+    if (!HOSTED) return;
+    window.claude.use("db").then(function(api){
+      if (!api){ remoteOff(); return; }
+      db = api;
+      remoteState = "on";
+      db.doc("meta/settings").get().then(function(snap){
+        if (!snap.exists) firstRun();
+        subscribe();
+      }, function(){ subscribe(); });
+      pump();
+      updateSaveStatus();
+    }, remoteOff);
+    window.claude.use("downloads").then(function(api){
+      if (!api) return;
+      downloadsApi = api;
+      renderToolbar();
+    }, function(){});
+  }
+  function remoteOff(){
+    remoteState = "off"; booting = false;
+    updateSaveStatus(); renderAll();
+  }
+  // A brand-new database: carry over whatever this browser already holds.
+  function firstRun(){
+    var recs = state.entries.slice();
+    Object.keys(state.gone).forEach(function(id){ recs.push({ id: id, deleted: true, updatedAt: state.gone[id] }); });
+    if (recs.length) queueWrites(recs);
+    writeSettings();
+  }
+  function writeSettings(){
+    if (!db) return;
+    db.doc("meta/settings").set({ currency: state.currency, currencyAt: state.currencyAt, seeded: true }).catch(function(){});
+  }
+  function subscribe(){
+    db.collection("entries").onSnapshot(function(snap){
+      var recs = snap.docs.map(function(d){
+        var b = d.data() || {}, r = {};
+        Object.keys(b).forEach(function(k){ r[k] = b[k]; });
+        r.id = d.id;
+        return r;
+      });
+      fromRemote(recs, !snap.metadata.fromCache);
+    }, function(err){
+      if (err && (err.code === "unavailable" || err.code === "resource_exhausted")) setTimeout(subscribe, 3000);
+      else remoteOff();
+    });
+    db.doc("meta/settings").onSnapshot(function(snap){
+      if (!snap.exists) return;
+      var d = snap.data() || {};
+      if (CURRENCIES.indexOf(d.currency) >= 0 && (+d.currencyAt || 0) >= state.currencyAt && d.currency !== state.currency){
+        state.currency = d.currency; state.currencyAt = +d.currencyAt || 0;
+        curSel.value = state.currency; buildFormatters(); saveLocal(); scheduleRender();
+      }
+    }, function(){});
+  }
+  // The database is the record. A definitive snapshot replaces what this
+  // browser holds (minus writes still on their way); an early, partial one
+  // only adds what is newer, so the screen never flickers half-empty.
+  function fromRemote(recs, definitive){
+    var next = definitive ? normalize({ entries: recs }) : { entries: state.entries.slice(), gone: shallow(state.gone) };
+    if (!definitive){
+      var inc = normalize({ entries: recs });
+      inc.entries.forEach(function(e){ var cur = versionOf(next, e.id); if (e.updatedAt > cur) applyRecord(next, e); });
+      Object.keys(inc.gone).forEach(function(id){ if (inc.gone[id] > versionOf(next, id)) applyRecord(next, { id: id, deleted: true, updatedAt: inc.gone[id] }); });
+    }
+    Object.keys(outbox).forEach(function(id){
+      var r = outbox[id];
+      if (r.updatedAt >= versionOf(next, id)) applyRecord(next, r);
+    });
+    state.entries = next.entries; state.gone = next.gone;
+    if (definitive || recs.length) booting = false;
+    saveLocal();
+    scheduleRender();
+  }
+  function versionOf(store, id){
+    for (var i=0;i<store.entries.length;i++) if (store.entries[i].id === id) return store.entries[i].updatedAt;
+    return store.gone[id] !== undefined ? store.gone[id] : -1;
+  }
+  function shallow(o){ var r = {}; Object.keys(o).forEach(function(k){ r[k] = o[k]; }); return r; }
+
+  /* ---------------- rendering ---------------- */
+  var renderTimer = null;
+  function scheduleRender(){
+    if (renderTimer) return;
+    renderTimer = setTimeout(function(){ renderTimer = null; renderAll(); }, 16);
+  }
+  function renderAll(){
+    renderHeader();
+    if (view === "overview") renderOverview();
+    renderRows();
+    renderToolbar();
+    rememberPlace();
+  }
+  function renderOverview(){
+    renderHero();
+    renderCharts();
+    renderCategories();
+  }
+
+  /* -------- stay where you were --------
+     The tab and scope you last used come back next time; the month always
+     opens on the latest one. */
+  var view = "overview";
+  (function recallPlace(){
+    var p = lsGet(PLACE_KEY);
+    if (!p) return;
+    if (p.view === "entries" || p.view === "overview") view = p.view;
+    if (Object.prototype.hasOwnProperty.call(SCOPES, p.scope)) scope = p.scope;
+  })();
+  function rememberPlace(){ lsSet(PLACE_KEY, { view: view, scope: scope }); }
+  function applyScope(){
+    Array.prototype.forEach.call(document.querySelectorAll("#scopeTabs button"), function(b){
+      if (b.getAttribute("data-scope") === scope) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
+  }
+  function setScope(sc){
+    if (!Object.prototype.hasOwnProperty.call(SCOPES, sc) || sc === scope) return;
+    scope = sc;
+    applyScope();
+    if (!editingId) resetForm();   // the default date has to land in the new period
+    renderAll();
+  }
+  function applyView(){
+    document.getElementById("viewOverview").hidden = view !== "overview";
+    document.getElementById("viewEntries").hidden = view !== "entries";
+    document.getElementById("fab").hidden = view !== "overview";
+    Array.prototype.forEach.call(document.querySelectorAll("#pageTabs button"), function(b){
+      if (b.getAttribute("data-view") === view) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
+  }
+  function setView(v){
+    view = v;
+    applyView();
+    rememberPlace();
+    // Charts measure their container, which is zero-width while hidden.
+    if (v === "overview") renderOverview();
+  }
+
+  function renderHeader(){
+    var main, sub, r = currentRange();
+    if (scope === "year"){
+      main = selMonth.slice(0,4); sub = "Jan – Dec";
+    } else if (scope === "quarter"){
+      main = "Q" + quarterOf(selMonth) + " " + selMonth.slice(0,4);
+      sub = monthAbbr(r.start) + " – " + monthAbbr(r.end);
+    } else {
+      main = monthOnly(selMonth); sub = selMonth.slice(0,4);
+    }
+    document.getElementById("periodLabel").firstChild.nodeValue = main;
+    document.getElementById("periodSub").textContent = sub;
+    var b = windowBuckets();
+    document.getElementById("rangeLabel").textContent =
+      periodCompact(scope, b[0].anchor) + " – " + periodCompact(scope, b[b.length-1].anchor);
+  }
+
+  function renderHero(){
+    var t = totalsFor(currentRange());
+    var b = band(t.factor, scope);
+    var ifVal = document.getElementById("ifVal");
+    ifVal.textContent = t.factor === null ? "—" : t.factor === Infinity ? "∞" : t.factor.toFixed(2);
+    var v = document.getElementById("verdict");
+    v.setAttribute("data-band", b.key);
+    v.querySelector(".mark").textContent = b.mark;
+    document.getElementById("verdictText").textContent = booting ? "Loading…" : b.text;
+    document.getElementById("ifNote").textContent = booting ? "Fetching your entries." : b.note;
+
+    var max = Math.max(t.income, t.expense, 1);
+    document.getElementById("fillInc").style.width = (t.income / max * 100) + "%";
+    document.getElementById("fillExp").style.width = (t.expense / max * 100) + "%";
+    document.getElementById("amtInc").textContent = t.income ? money(t.income) : "—";
+    document.getElementById("amtExp").textContent = t.expense ? money(t.expense) : "—";
+
+    // The break-even line sits on the income track at the height expenses reached:
+    // income clears it when the blue bar runs past the dashes.
+    var be = document.getElementById("breakeven");
+    if (t.expense > 0 && t.income > 0){
+      var pct = t.expense / max * 100;
+      be.style.left = pct + "%";
+      be.classList.toggle("flip", pct > 62);
+      be.hidden = false;
+    } else { be.hidden = true; }
+
+    document.getElementById("tIncome").textContent = t.income ? money(t.income) : "—";
+    document.getElementById("tExpense").textContent = t.expense ? money(t.expense) : "—";
+    var net = document.getElementById("tNet");
+    net.textContent = (t.incCount + t.expCount) ? money(t.net) : "—";
+    net.className = "v num " + (!(t.incCount + t.expCount) ? "" : t.net >= 0 ? "pos" : "neg");
+    document.getElementById("incCount").textContent = t.incCount + (t.incCount === 1 ? " entry" : " entries");
+    document.getElementById("expCount").textContent = t.expCount + (t.expCount === 1 ? " entry" : " entries");
+    document.getElementById("netSub").textContent = t.net >= 0 ? "kept this " + scope : "drawn from savings";
+  }
+
+  /* -------- charts -------- */
+  // Pick a round tick step that covers `max` in 4-6 intervals, so gridlines land
+  // on readable numbers, and so 1.0x is itself a tick on the factor chart.
+  function scaleFor(max){
+    if (!(max > 0)) return { top: 100, step: 25, ticks: 4 };
+    var exp = Math.floor(Math.log10(max)), cands = [];
+    [1, 2, 2.5, 5, 10].forEach(function(m){
+      [exp-2, exp-1, exp, exp+1].forEach(function(e){ cands.push(m * Math.pow(10, e)); });
+    });
+    cands.sort(function(a,b){ return a - b; });
+    for (var i=0;i<cands.length;i++){
+      var n = Math.ceil(max / cands[i] - 1e-9);
+      if (n >= 4 && n <= 6) return { top: cands[i] * n, step: cands[i], ticks: n };
+    }
+    return { top: max, step: max/4, ticks: 4 };
+  }
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+
+  function renderCharts(){
+    var data = windowBuckets().map(function(bk){ var t = totalsFor(bk); t.bk = bk; return t; });
+    drawBars(document.getElementById("plotBars"), data);
+    drawFactor(document.getElementById("plotFactor"), data);
+    buildTable("tableBars", data, "money");
+    buildTable("tableFactor", data, "factor");
+  }
+
+  function drawBars(host, data){
+    var W = Math.max(300, host.clientWidth), H = 218;
+    var pad = { t:10, r:8, b:26, l:58 };
+    var iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+    var sc = scaleFor(Math.max.apply(null, data.map(function(d){ return Math.max(d.income, d.expense); }).concat([1])));
+    var top = sc.top, cur = currentRange();
+    var slot = iw / data.length, bw = Math.max(4, Math.min(15, (slot - 8) / 2));
+    var s = '<svg class="viz" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="Monthly income and expenses">';
+    s += '<defs><pattern id="hx" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">' +
+         '<rect class="pat-base" width="5" height="5"/><rect class="pat-line" width="1.6" height="5"/></pattern></defs>';
+    for (var g=0; g<=sc.ticks; g++){
+      var yv = sc.step * g, y = pad.t + ih - (yv/top) * ih;
+      s += '<line class="grid" x1="' + pad.l + '" y1="' + y.toFixed(1) + '" x2="' + (W-pad.r) + '" y2="' + y.toFixed(1) + '"/>';
+      s += '<text x="' + (pad.l-8) + '" y="' + (y+3.5).toFixed(1) + '" text-anchor="end">' + esc(moneyShort(yv)) + '</text>';
+    }
+    for (var i=0;i<data.length;i++){
+      var d = data[i], cx = pad.l + slot*i + slot/2;
+      var hi = (d.income/top) * ih, he = (d.expense/top) * ih;
+      if (hi > 0) s += roundedBar(cx - bw - 1, pad.t + ih - hi, bw, hi, 'class="bar-inc"');
+      if (he > 0) s += roundedBar(cx + 1, pad.t + ih - he, bw, he, 'fill="url(#hx)"');
+      var isSel = d.bk.start === cur.start;
+      s += '<text' + (isSel ? ' class="axis-sel"' : '') + ' x="' + cx.toFixed(1) + '" y="' + (H-9) + '" text-anchor="middle">' + esc(d.bk.tick) + '</text>';
+      s += '<rect class="hit" data-i="' + i + '" x="' + (pad.l + slot*i).toFixed(1) + '" y="' + pad.t + '" width="' + slot.toFixed(1) + '" height="' + ih + '"/>';
+    }
+    s += '</svg>';
+    host.innerHTML = s;
+    wireHits(host, data, function(d){
+      return '<div class="th">' + esc(d.bk.title) + '</div>' +
+        '<div class="tr"><span>Income</span><span>' + esc(money(d.income)) + '</span></div>' +
+        '<div class="tr"><span>Expenses</span><span>' + esc(money(d.expense)) + '</span></div>' +
+        '<div class="tr"><span>Factor</span><span>' + esc(factorText(d.factor)) + '</span></div>';
+    });
+  }
+  // Bars are rounded only at the data end; the baseline end stays square.
+  function roundedBar(x, y, w, h, paint){
+    var r = Math.min(4, w/2, h);
+    return '<path ' + paint + ' d="M' + x.toFixed(1) + ' ' + (y+h).toFixed(1) + ' L' + x.toFixed(1) + ' ' + (y+r).toFixed(1) +
+      ' Q' + x.toFixed(1) + ' ' + y.toFixed(1) + ' ' + (x+r).toFixed(1) + ' ' + y.toFixed(1) +
+      ' L' + (x+w-r).toFixed(1) + ' ' + y.toFixed(1) + ' Q' + (x+w).toFixed(1) + ' ' + y.toFixed(1) + ' ' + (x+w).toFixed(1) + ' ' + (y+r).toFixed(1) +
+      ' L' + (x+w).toFixed(1) + ' ' + (y+h).toFixed(1) + ' Z"/>';
+  }
+
+  function drawFactor(host, data){
+    var W = Math.max(300, host.clientWidth), H = 218;
+    var pad = { t:14, r:14, b:26, l:52 };
+    var iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+    var finite = data.filter(function(d){ return d.factor !== null && d.factor !== Infinity; }).map(function(d){ return d.factor; });
+    var sc = scaleFor(Math.max(1.6, finite.length ? Math.max.apply(null, finite) * 1.08 : 2));
+    var top = sc.top;
+    var slot = iw / data.length, cur = currentRange();
+    var y = function(v){ return pad.t + ih - Math.min(v, top)/top * ih; };
+    var x = function(i){ return pad.l + slot*i + slot/2; };
+    var s = '<svg class="viz" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="Independence factor by month">';
+    var dp = sc.step < 1 ? (sc.step < 0.1 ? 2 : 1) : 0;
+    for (var g=0; g<=sc.ticks; g++){
+      var yv = sc.step * g, yy = y(yv);
+      // 1.0x gets the dashed break-even rule instead of a plain gridline.
+      if (Math.abs(yv - 1) > 1e-9)
+        s += '<line class="grid" x1="' + pad.l + '" y1="' + yy.toFixed(1) + '" x2="' + (W-pad.r) + '" y2="' + yy.toFixed(1) + '"/>';
+      s += '<text x="' + (pad.l-8) + '" y="' + (yy+3.5).toFixed(1) + '" text-anchor="end">' + yv.toFixed(dp) + '×</text>';
+    }
+    var y1 = y(1);
+    s += '<line class="rule" x1="' + pad.l + '" y1="' + y1.toFixed(1) + '" x2="' + (W-pad.r) + '" y2="' + y1.toFixed(1) + '"/>';
+    s += '<text class="rule-lbl" x="' + (W-pad.r) + '" y="' + (y1-6).toFixed(1) + '" text-anchor="end">BREAK-EVEN</text>';
+
+    var seg = [], segs = [];
+    for (var i=0;i<data.length;i++){
+      var f = data[i].factor;
+      if (f === null || f === Infinity){ if (seg.length) segs.push(seg); seg = []; continue; }
+      seg.push([x(i), y(f)]);
+    }
+    if (seg.length) segs.push(seg);
+    for (var k=0;k<segs.length;k++){
+      if (segs[k].length < 2) continue;
+      s += '<polyline class="trend" points="' +
+        segs[k].map(function(p){ return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ") + '"/>';
+    }
+    for (i=0;i<data.length;i++){
+      var d = data[i];
+      if (d.factor === Infinity){
+        s += '<text class="inf" x="' + x(i).toFixed(1) + '" y="' + (pad.t+9) + '" text-anchor="middle">∞</text>';
+        continue;
+      }
+      if (d.factor === null) continue;
+      var sel = d.bk.start === cur.start;
+      s += '<circle class="dot" cx="' + x(i).toFixed(1) + '" cy="' + y(d.factor).toFixed(1) + '" r="' + (sel ? 5.5 : 4) + '"/>';
+      if (sel) s += '<text class="val" x="' + x(i).toFixed(1) + '" y="' + (y(d.factor)-13).toFixed(1) + '" text-anchor="middle">' + d.factor.toFixed(2) + '×</text>';
+    }
+    for (i=0;i<data.length;i++){
+      var isSel2 = data[i].bk.start === cur.start;
+      s += '<text' + (isSel2 ? ' class="axis-sel"' : '') + ' x="' + x(i).toFixed(1) + '" y="' + (H-9) + '" text-anchor="middle">' + esc(data[i].bk.tick) + '</text>';
+      s += '<rect class="hit" data-i="' + i + '" x="' + (pad.l + slot*i).toFixed(1) + '" y="' + pad.t + '" width="' + slot.toFixed(1) + '" height="' + ih + '"/>';
+    }
+    s += '</svg>';
+    host.innerHTML = s;
+    wireHits(host, data, function(d){
+      return '<div class="th">' + esc(d.bk.title) + '</div>' +
+        '<div class="tr"><span>Factor</span><span>' + esc(factorText(d.factor)) + '</span></div>' +
+        '<div class="tr"><span>Net</span><span>' + esc(d.incCount + d.expCount ? money(d.net) : "—") + '</span></div>';
+    });
+  }
+  function factorText(f){ return f === null ? "—" : f === Infinity ? "∞" : f.toFixed(2) + "×"; }
+
+  /* -------- confirmation dialog --------
+     A sandboxed frame silently returns false from window.confirm(), which would
+     make every destructive action look like it did nothing. Ask in the page. */
+  var askResolve = null;
+  function ask(title, body, okLabel){
+    return new Promise(function(resolve){
+      askResolve = resolve;
+      hideTip();
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalBody").textContent = body;
+      document.getElementById("modalOk").textContent = okLabel;
+      document.getElementById("modal").hidden = false;
+      document.getElementById("modalCancel").focus();
+    });
+  }
+  function settleAsk(answer){
+    if (document.getElementById("modal").hidden) return;
+    document.getElementById("modal").hidden = true;
+    var r = askResolve; askResolve = null;
+    if (r) r(answer);
+  }
+  document.getElementById("modalOk").addEventListener("click", function(){ settleAsk(true); });
+  document.getElementById("modalCancel").addEventListener("click", function(){ settleAsk(false); });
+  document.getElementById("modal").addEventListener("click", function(ev){
+    if (ev.target === this) settleAsk(false);        // click the backdrop to dismiss
+  });
+  document.addEventListener("keydown", function(ev){
+    if (ev.key === "Escape"){ settleAsk(false); closeTransfer(); }
+  });
+
+  var tip = document.getElementById("tip");
+  function hideTip(){ tip.classList.remove("on"); }
+  window.addEventListener("scroll", hideTip, { passive: true });
+  function wireHits(host, data, html){
+    var hits = host.querySelectorAll(".hit");
+    for (var i=0;i<hits.length;i++){
+      (function(rect){
+        rect.addEventListener("mousemove", function(ev){
+          var d = data[+rect.getAttribute("data-i")];
+          tip.innerHTML = html(d);
+          tip.style.left = ev.clientX + "px";
+          tip.style.top = ev.clientY + "px";
+          tip.classList.add("on");
+        });
+        rect.addEventListener("mouseleave", hideTip);
+        rect.addEventListener("click", function(){
+          selMonth = data[+rect.getAttribute("data-i")].bk.anchor;
+          hideTip();
+          if (!editingId) resetForm();
+          renderAll();
+        });
+      })(hits[i]);
+    }
+  }
+
+  function buildTable(id, data, mode){
+    var host = document.getElementById(id);
+    var s = '<table><thead><tr><th>' + (scope === "year" ? "Year" : scope === "quarter" ? "Quarter" : "Month") + '</th>';
+    s += mode === "money" ? '<th>Income</th><th>Expenses</th><th>Net</th>' : '<th>Factor</th><th>Net</th>';
+    s += '</tr></thead><tbody>';
+    for (var i=data.length-1;i>=0;i--){
+      var d = data[i], any = d.incCount + d.expCount;
+      s += '<tr><td>' + esc(d.bk.title) + '</td>';
+      s += mode === "money"
+        ? '<td>' + esc(any ? money(d.income) : "—") + '</td><td>' + esc(any ? money(d.expense) : "—") + '</td><td>' + esc(any ? money(d.net) : "—") + '</td>'
+        : '<td>' + esc(factorText(d.factor)) + '</td><td>' + esc(any ? money(d.net) : "—") + '</td>';
+      s += '</tr>';
+    }
+    host.innerHTML = s + '</tbody></table>';
+  }
+
+  /* -------- categories -------- */
+  function groupBy(kind, r){
+    var map = {};
+    for (var i=0;i<state.entries.length;i++){
+      var e = state.entries[i], m = e.date.slice(0,7);
+      if (m < r.start || m > r.end || e.type !== kind) continue;
+      map[e.category] = (map[e.category] || 0) + e.amount;
+    }
+    return Object.keys(map).map(function(k){ return { name:k, v:map[k] }; })
+      .sort(function(a,b){ return b.v - a.v; });
+  }
+  function renderCategories(){
+    var r = currentRange();
+    drawCats("catsExp", "expHint", groupBy("expense", r), "expense");
+    drawCats("catsInc", "incHint", groupBy("income", r), "income");
+  }
+  function drawCats(hostId, hintId, list, kind){
+    var total = list.reduce(function(a,b){ return a + b.v; }, 0);
+    document.getElementById(hintId).textContent = list.length
+      ? money(total)
+      : (kind === "income" ? "Income by source" : "Expenses by category");
+    var host = document.getElementById(hostId);
+    if (!list.length){
+      host.innerHTML = booting
+        ? '<div class="empty"><span>Loading your entries…</span></div>'
+        : '<div class="empty"><b>No ' + (kind === "income" ? "income" : "expenses") +
+          ' logged</b><span>' + esc(periodTitle(scope, selMonth)) + ' has nothing on this side yet.</span></div>';
+      return;
+    }
+    var max = list[0].v, s = "";
+    for (var j=0;j<list.length;j++){
+      var c = list[j], pct = total ? Math.round(c.v/total*100) : 0;
+      s += '<div class="catrow">' +
+        '<span class="cn">' + esc(c.name) + '</span>' +
+        '<span class="cv">' + esc(money(c.v)) + '<em>' + pct + '%</em></span>' +
+        '<div class="catbar' + (kind === "income" ? " inc" : "") + '"><i style="width:' + (c.v/max*100).toFixed(1) + '%"></i></div>' +
+      '</div>';
+    }
+    host.innerHTML = s;
+  }
+
+  /* -------- ledger rows -------- */
+  function renderRows(){
+    var r = currentRange();
+    var list = state.entries.filter(function(e){ var m = e.date.slice(0,7); return m >= r.start && m <= r.end; })
+      .sort(function(a,b){ return a.date === b.date ? b.amount - a.amount : (a.date < b.date ? 1 : -1); });
+    var t = totalsFor(r);
+    document.getElementById("ledgerTitle").textContent = periodTitle(scope, selMonth) + " entries";
+    document.getElementById("ledgerCount").textContent = list.length
+      ? list.length + (list.length === 1 ? " entry" : " entries") + " · +" + money(t.income) + " / −" + money(t.expense)
+      : "";
+    var host = document.getElementById("rows");
+    if (!list.length){
+      if (booting){ host.innerHTML = '<div class="empty"><span>Loading your entries…</span></div>'; return; }
+      if (!HOSTED && !state.entries.length && !Object.keys(state.gone).length){
+        host.innerHTML = '<div class="empty welcome"><b>This iPhone has no entries yet</b>' +
+          '<span>Bring your ledger over from the Claude page, or add your first entry above.</span>' +
+          '<div class="xfer-act"><button type="button" class="btn primary" data-open-transfer="1">Move data here</button></div></div>';
+        return;
+      }
+      host.innerHTML = '<div class="empty"><b>This ' + scope + ' is empty</b><span>Add an entry above' +
+        (scope === "month" ? ', or copy last month’s to start from what you already know' : '') + '.</span></div>';
+      return;
+    }
+    var s = '<table><thead><tr><th>Date</th><th>Detail</th><th style="text-align:right">Amount</th><th></th></tr></thead><tbody>';
+    for (var i=0;i<list.length;i++){
+      var e = list[i], isInc = e.type === "income";
+      s += '<tr>' +
+        '<td class="d">' + esc(dayLabel(e.date)) + '</td>' +
+        // On a phone the date column folds into the second line of the detail.
+        '<td class="desc"><b>' + esc(e.category) + '</b><span' + (e.note ? '' : ' class="nosub"') + '>' +
+          '<em class="dm">' + esc(dayLabel(e.date)) + (e.note ? ' · ' : '') + '</em>' + esc(e.note) + '</span></td>' +
+        '<td class="a" style="color:var(--' + (isInc ? "income" : "expense") + ')">' + (isInc ? "+" : "−") + esc(money(e.amount)) + '</td>' +
+        '<td class="x"><button type="button" class="rowbtn" data-edit="' + esc(e.id) + '" title="Edit">Edit</button>' +
+        '<button type="button" class="rowbtn del" data-del="' + esc(e.id) + '" title="Delete" aria-label="Delete">✕</button></td>' +
+      '</tr>';
+    }
+    host.innerHTML = s + '</tbody></table>';
+  }
+
+  function canSaveFiles(){ return HOSTED ? !!downloadsApi : true; }
+  function renderToolbar(){
+    document.getElementById("copyPrev").hidden = scope !== "month";
+    document.getElementById("sampleBtn").hidden = state.entries.length > 0 || booting;
+    document.getElementById("exportCsv").hidden = !canSaveFiles();
+    document.getElementById("xSave").hidden = !canSaveFiles();
+  }
+
+  /* ---------------- form ---------------- */
+  function isPhone(){ return window.matchMedia && window.matchMedia("(max-width:620px)").matches; }
+  function currentType(){
+    var r = document.querySelector('input[name="type"]:checked');
+    return r ? r.value : "expense";
+  }
+  function refreshCatList(){
+    var used = {}, kind = currentType();
+    for (var i=0;i<state.entries.length;i++){
+      var e = state.entries[i];
+      if (e.type === kind) used[e.category] = (used[e.category] || 0) + 1;
+    }
+    var names = CATS[kind].slice();
+    Object.keys(used).forEach(function(n){ if (names.indexOf(n) < 0) names.push(n); });
+    document.getElementById("catList").innerHTML = names.map(function(n){ return '<option value="' + esc(n) + '"></option>'; }).join("");
+    document.getElementById("fCat").placeholder = kind === "income" ? "Salary" : "Housing";
+    // One tap for the categories you actually use, most frequent first.
+    var top = Object.keys(used).sort(function(a,b){ return used[b] - used[a]; }).slice(0, 6);
+    for (var j=0; top.length < 4 && j < CATS[kind].length; j++) if (top.indexOf(CATS[kind][j]) < 0) top.push(CATS[kind][j]);
+    document.getElementById("catChips").innerHTML = top.map(function(n){
+      return '<button type="button" class="chip-btn" data-cat="' + esc(n) + '" aria-pressed="false">' + esc(n) + '</button>';
+    }).join("");
+    markChips();
+  }
+  function markChips(){
+    var v = document.getElementById("fCat").value.trim();
+    Array.prototype.forEach.call(document.querySelectorAll("#catChips .chip-btn"), function(b){
+      b.setAttribute("aria-pressed", b.getAttribute("data-cat") === v ? "true" : "false");
+    });
+  }
+  // The category starts empty on purpose: the placeholder and the dropdown list
+  // offer suggestions without putting a value in the field no one chose.
+  function resetForm(){
+    editingId = null;
+    document.getElementById("entryForm").reset();
+    clearErrors();
+    document.getElementById("fDate").value = defaultDate();
+    document.getElementById("submitBtn").textContent = "Add entry";
+    document.getElementById("cancelEdit").hidden = true;
+    refreshCatList();
+    refreshDateEcho();
+  }
+
+  /* -------- validation, in the page's own voice -------- */
+  var FIELDS = { fDate: "errDate", fCat: "errCat", fAmt: "errAmt" };
+  function setFieldError(id, msg){
+    var input = document.getElementById(id);
+    input.parentNode.classList.toggle("err", !!msg);
+    document.getElementById(FIELDS[id]).textContent = msg || "";
+    input.setAttribute("aria-invalid", msg ? "true" : "false");
+  }
+  function clearErrors(){ Object.keys(FIELDS).forEach(function(id){ setFieldError(id, ""); }); }
+  // The browser draws the date picker in its own locale, so restate the chosen
+  // date underneath it in Canadian English.
+  function refreshDateEcho(){
+    var v = document.getElementById("fDate").value;
+    document.getElementById("dateEcho").textContent =
+      /^\d{4}-\d{2}-\d{2}$/.test(v) ? fullDate(v) : "YYYY-MM-DD";
+  }
+  // Accepts "12.50", "12,50" and "$1,234.56" alike.
+  function parseAmount(raw){
+    var s = String(raw || "").replace(/[^\d.,-]/g, "");
+    if (/,\d{1,2}$/.test(s) && s.indexOf(".") < 0) s = s.replace(",", ".");
+    return parseFloat(s.replace(/,/g, ""));
+  }
+  function validate(){
+    var date = document.getElementById("fDate").value;
+    var cat = document.getElementById("fCat").value.trim();
+    var raw = document.getElementById("fAmt").value.trim();
+    var amt = parseAmount(raw);
+
+    var errs = {
+      fDate: /^\d{4}-\d{2}-\d{2}$/.test(date) ? "" : "Pick a date for this entry.",
+      fCat:  cat ? "" : "Name a category, or pick one from the list.",
+      fAmt:  !raw ? "Enter an amount."
+             : (!isFinite(amt) || amt <= 0) ? "Enter an amount greater than zero." : ""
+    };
+    var order = isPhone() ? ["fAmt", "fDate", "fCat"] : ["fDate", "fCat", "fAmt"];
+    var bad = order.filter(function(id){ return errs[id]; });
+    Object.keys(errs).forEach(function(id){ setFieldError(id, errs[id]); });
+    if (bad.length) document.getElementById(bad[0]).focus();
+    return bad.length === 0;
+  }
+  function defaultDate(){
+    var r = currentRange(), today = ymOf(new Date());
+    if (today >= r.start && today <= r.end) return todayISO();
+    return r.start + "-01";
+  }
+
+  /* ---------------- events ---------------- */
+  function stepPeriod(dir){
+    selMonth = addMonths(selMonth, dir * SCOPES[scope].step);
+    if (!editingId) resetForm();
+    renderAll();
+  }
+  document.getElementById("prev").addEventListener("click", function(){ stepPeriod(-1); });
+  document.getElementById("next").addEventListener("click", function(){ stepPeriod(1); });
+
+  var curSel = document.getElementById("currency");
+  curSel.innerHTML = CURRENCIES.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join("");
+  curSel.value = state.currency;
+  curSel.addEventListener("change", function(){
+    state.currency = curSel.value; state.currencyAt = stamp();
+    buildFormatters(); saveLocal(); writeSettings(); renderAll();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="type"]'), function(r){
+    r.addEventListener("change", function(){
+      // Swap the suggestion list and placeholder; leave whatever was typed alone.
+      refreshCatList();
+      setFieldError("fCat", "");
+    });
+  });
+
+  // Clear a field's complaint as soon as the person starts fixing it.
+  Object.keys(FIELDS).forEach(function(id){
+    document.getElementById(id).addEventListener("input", function(){ setFieldError(id, ""); });
+  });
+  document.getElementById("fDate").addEventListener("input", refreshDateEcho);
+  document.getElementById("fCat").addEventListener("input", markChips);
+  document.getElementById("catChips").addEventListener("click", function(ev){
+    var b = ev.target.closest(".chip-btn");
+    if (!b) return;
+    document.getElementById("fCat").value = b.getAttribute("data-cat");
+    setFieldError("fCat", "");
+    markChips();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll("#pageTabs button"), function(b){
+    b.addEventListener("click", function(){ setView(b.getAttribute("data-view")); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("#scopeTabs button"), function(b){
+    b.addEventListener("click", function(){ setScope(b.getAttribute("data-scope")); });
+  });
+
+  document.getElementById("entryForm").addEventListener("submit", function(ev){
+    ev.preventDefault();
+    if (!validate()) return;
+    var wasEditing = !!editingId;
+    var rec = cleanEntry({
+      id: editingId || uid(),
+      date: document.getElementById("fDate").value,
+      type: currentType(),
+      category: (document.getElementById("fCat").value || "Other").trim(),
+      note: document.getElementById("fNote").value.trim(),
+      amount: parseAmount(document.getElementById("fAmt").value),
+      updatedAt: stamp()
+    });
+    var keepType = rec.type;
+    commit([rec]);
+    selMonth = rec.date.slice(0,7);
+    resetForm();
+    // A run of expenses is the common case: keep the type you were on.
+    if (!wasEditing && keepType === "income"){
+      document.querySelector('input[name="type"][value="income"]').checked = true;
+      refreshCatList();
+    }
+    renderAll();
+    flashStatus((wasEditing ? "Updated " : "Added ") + rec.category + " " + money(rec.amount));
+    document.getElementById(isPhone() ? "fAmt" : "fCat").focus();
+  });
+
+  document.getElementById("cancelEdit").addEventListener("click", resetForm);
+
+  document.getElementById("rows").addEventListener("click", function(ev){
+    var b = ev.target.closest("button");
+    if (!b) return;
+    if (b.hasAttribute("data-open-transfer")){ openTransfer(); return; }
+    var del = b.getAttribute("data-del"), ed = b.getAttribute("data-edit");
+    if (del){
+      var gone = findEntry(del);
+      if (!gone) return;
+      commit([{ id: del, deleted: true, updatedAt: stamp() }]);
+      if (editingId === del) resetForm();
+      renderAll();
+      showToast("Deleted " + gone.category + " " + money(gone.amount), function(){
+        var back = cleanEntry(gone); back.updatedAt = stamp();
+        commit([back]); renderAll();
+      });
+    } else if (ed){
+      var e2 = findEntry(ed);
+      if (!e2) return;
+      editingId = ed;
+      clearErrors();
+      document.querySelector('input[name="type"][value="' + e2.type + '"]').checked = true;
+      refreshCatList();
+      document.getElementById("fDate").value = e2.date;
+      refreshDateEcho();
+      document.getElementById("fCat").value = e2.category;
+      markChips();
+      document.getElementById("fNote").value = e2.note;
+      document.getElementById("fAmt").value = e2.amount;
+      document.getElementById("submitBtn").textContent = "Update entry";
+      document.getElementById("cancelEdit").hidden = false;
+      document.getElementById("entryForm").scrollIntoView({ block: "start", behavior: "smooth" });
+      document.getElementById("fAmt").focus({ preventScroll: true });
+    }
+  });
+
+  document.getElementById("copyPrev").addEventListener("click", function(){
+    var prev = addMonths(selMonth,-1);
+    var src = state.entries.filter(function(e){ return e.date.slice(0,7) === prev; });
+    if (!src.length){ flashStatus("Nothing in " + monthName(prev, "short") + " to copy"); return; }
+    var days = new Date(+selMonth.slice(0,4), +selMonth.slice(5,7), 0).getDate();
+    commit(src.map(function(e){
+      var day = Math.min(+e.date.slice(8,10), days);
+      return cleanEntry({ id: uid(), date: selMonth + "-" + pad(day), type: e.type, category: e.category, note: e.note, amount: e.amount, updatedAt: stamp() });
+    }));
+    renderAll();
+    flashStatus("Copied " + src.length + " from " + monthName(prev, "short"));
+  });
+
+  document.querySelectorAll(".tablink").forEach(function(b){
+    b.addEventListener("click", function(){
+      var t = document.getElementById(b.getAttribute("data-table"));
+      t.hidden = !t.hidden;
+      b.textContent = t.hidden ? "Show data table" : "Hide data table";
+    });
+  });
+
+  document.getElementById("clearAll").addEventListener("click", function(){
+    var n = state.entries.length;
+    if (!n){ flashStatus("There is nothing to clear"); return; }
+    ask("Clear everything?",
+        "This deletes all " + n + (n === 1 ? " entry" : " entries") + " from every month" +
+        (HOSTED ? ", on every device that opens this page" : " on this device") + ". It cannot be undone.",
+        "Delete all").then(function(ok){
+      if (!ok) return;
+      var t = stamp();
+      commit(state.entries.map(function(e){ return { id: e.id, deleted: true, updatedAt: t }; }));
+      resetForm(); renderAll();
+      flashStatus("Deleted " + n + (n === 1 ? " entry" : " entries"));
+    });
+  });
+
+  document.getElementById("sampleBtn").addEventListener("click", function(){
+    commit(sampleEntries());
+    selMonth = ymOf(new Date());
+    resetForm(); renderAll();
+  });
+
+  document.getElementById("exportCsv").addEventListener("click", function(){
+    var rows = [["date","type","category","note","amount","currency"]];
+    state.entries.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; }).forEach(function(e){
+      rows.push([e.date, e.type, e.category, e.note, e.amount.toFixed(2), state.currency]);
+    });
+    var csv = rows.map(function(r){ return r.map(function(c){ return '"' + String(c).replace(/"/g,'""') + '"'; }).join(","); }).join("\r\n");
+    saveFile("independence-ledger.csv", csv, "text/csv").then(function(){ flashStatus("Saved independence-ledger.csv"); }, fileFailed);
+  });
+
+  // Inside Claude the viewer hands files over; the standalone app uses the
+  // iPhone share sheet (Save to Files, AirDrop) where it can.
+  function saveFile(filename, data, mime){
+    if (HOSTED){
+      if (!downloadsApi) return Promise.reject({ code: "unavailable" });
+      return downloadsApi.save({ filename: filename, data: data });
+    }
+    var file = null;
+    try { file = new File([data], filename, { type: mime }); } catch(e){}
+    if (file && navigator.canShare && navigator.share && navigator.canShare({ files: [file] })){
+      return navigator.share({ files: [file], title: filename }).catch(function(err){
+        if (err && err.name === "AbortError") throw { code: "declined" };
+        throw err;
+      });
+    }
+    var url = URL.createObjectURL(new Blob([data], { type: mime }));
+    var a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+    return Promise.resolve();
+  }
+  function fileFailed(err){
+    if (err && err.code === "declined") return;
+    flashStatus("Could not save that file");
+  }
+
+  /* ---------------- moving data between devices ---------------- */
+  var transferEl = document.getElementById("transfer");
+  function openTransfer(){
+    hideTip();
+    document.getElementById("xMsg").textContent = "";
+    document.getElementById("xMsg").removeAttribute("data-kind");
+    document.getElementById("xOut").hidden = true;
+    document.getElementById("xIn").value = "";
+    document.getElementById("transferIntro").textContent = HOSTED
+      ? "This Claude page and the iPhone app each keep their own copy. Moving data merges entry by entry: the newer edit wins and deletions carry over, so nothing is overwritten wholesale."
+      : "This app keeps its entries on this iPhone. Moving data to or from the Claude page merges entry by entry: the newer edit wins and deletions carry over, so nothing is overwritten wholesale.";
+    transferEl.hidden = false;
+    document.getElementById("xCopy").focus();
+  }
+  function closeTransfer(){ transferEl.hidden = true; }
+  document.getElementById("transferBtn").addEventListener("click", openTransfer);
+  document.getElementById("xClose").addEventListener("click", closeTransfer);
+  transferEl.addEventListener("click", function(ev){ if (ev.target === transferEl) closeTransfer(); });
+
+  function xMsg(kind, text){
+    var el = document.getElementById("xMsg");
+    el.textContent = text;
+    if (kind) el.setAttribute("data-kind", kind); else el.removeAttribute("data-kind");
+  }
+  function exportPayload(){
+    return JSON.stringify({
+      app: "independence-ledger", v: 2, exportedAt: Date.now(),
+      currency: state.currency, currencyAt: state.currencyAt,
+      entries: state.entries,
+      deleted: Object.keys(state.gone).map(function(id){ return { id: id, updatedAt: state.gone[id] }; })
+    });
+  }
+  document.getElementById("xCopy").addEventListener("click", function(){
+    var text = exportPayload(), n = state.entries.length;
+    var ok = function(){ xMsg("good", "Copied " + n + (n === 1 ? " entry" : " entries") + ". On the other device, open Move data and paste."); };
+    var fallback = function(){
+      var box = document.getElementById("xOut");
+      box.hidden = false; box.value = text; box.focus(); box.select();
+      var copied = false;
+      try { copied = document.execCommand("copy"); } catch(e){}
+      if (copied) ok(); else xMsg("", "Copying was blocked here. The text in the box is selected; copy it yourself.");
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback);
+    else fallback();
+  });
+  document.getElementById("xSave").addEventListener("click", function(){
+    var name = "independence-ledger-" + todayISO() + ".json";
+    saveFile(name, exportPayload(), "application/json").then(function(){ xMsg("good", "Saved " + name + "."); }, function(err){
+      if (err && err.code === "declined") return;
+      xMsg("bad", "Could not save the file. Use Copy data instead.");
+    });
+  });
+  document.getElementById("xMerge").addEventListener("click", function(){
+    var text = document.getElementById("xIn").value;
+    if (!text.trim()){ xMsg("bad", "Paste the data from the other device first."); document.getElementById("xIn").focus(); return; }
+    mergeText(text);
+  });
+  document.getElementById("xFile").addEventListener("click", function(){ document.getElementById("importFile").click(); });
+  document.getElementById("importFile").addEventListener("change", function(ev){
+    var f = ev.target.files && ev.target.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){ mergeText(String(r.result || "")); };
+    r.readAsText(f);
+    ev.target.value = "";
+  });
+
+  function mergeText(text){
+    var obj;
+    try { obj = JSON.parse(text.trim()); } catch(e){ obj = null; }
+    if (!obj || typeof obj !== "object" || !Array.isArray(obj.entries)){
+      xMsg("bad", "That isn't data from this ledger. Copy it again on the other device and paste all of it.");
+      return;
+    }
+    var inc = normalize(obj), recs = [], added = 0, updated = 0, removed = 0;
+    var wasEmpty = !state.entries.length && !Object.keys(state.gone).length;
+    inc.entries.forEach(function(e){
+      var cur = findEntry(e.id), g = state.gone[e.id];
+      if (cur){ if (e.updatedAt > cur.updatedAt){ recs.push(e); updated++; } }
+      else if (g === undefined || e.updatedAt > g){ recs.push(e); added++; }
+    });
+    Object.keys(inc.gone).forEach(function(id){
+      var t = inc.gone[id], cur = findEntry(id);
+      if (cur){ if (t > cur.updatedAt){ recs.push({ id: id, deleted: true, updatedAt: t }); removed++; } }
+      else if (!(state.gone[id] >= t)) recs.push({ id: id, deleted: true, updatedAt: t });   // keep the marker travelling
+    });
+    var curChanged = false;
+    if (CURRENCIES.indexOf(obj.currency) >= 0 && obj.currency !== state.currency &&
+        (inc.currencyAt > state.currencyAt || wasEmpty)){
+      state.currency = obj.currency; state.currencyAt = Math.max(inc.currencyAt, state.currencyAt);
+      curSel.value = state.currency; buildFormatters(); saveLocal(); writeSettings(); curChanged = true;
+    }
+    if (!recs.length && !curChanged){ xMsg("good", "Already up to date. Nothing in that data is newer than what's here."); return; }
+    commit(recs);
+    if (wasEmpty) selMonth = defaultMonth();
+    if (!editingId) resetForm();
+    renderAll();
+    document.getElementById("xIn").value = "";
+    var parts = [];
+    if (added) parts.push(added + " added");
+    if (updated) parts.push(updated + " updated");
+    if (removed) parts.push(removed + " removed");
+    if (curChanged) parts.push("currency set to " + state.currency);
+    xMsg("good", "Merged: " + (parts.join(", ") || "deletion markers only") + ".");
+  }
+
+  /* ---------------- undo toast ---------------- */
+  var toastTimer = null, toastUndo = null;
+  function showToast(text, undo){
+    document.getElementById("toastText").textContent = text;
+    toastUndo = undo;
+    document.getElementById("toast").hidden = false;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 6000);
+  }
+  function hideToast(){ document.getElementById("toast").hidden = true; toastUndo = null; }
+  document.getElementById("toastBtn").addEventListener("click", function(){
+    var u = toastUndo; hideToast();
+    if (u) u();
+  });
+
+  document.getElementById("fab").addEventListener("click", function(){
+    setView("entries");
+    if (!editingId) resetForm();
+    window.scrollTo(0, 0);
+    document.getElementById("fAmt").focus();
+  });
+
+  // Charts are drawn at their container's pixel width, so watch the containers
+  // themselves rather than the window: cards resize when the grid reflows too.
+  var lastPlotW = 0, rt = null;
+  function onPlotResize(){
+    var w = document.getElementById("plotBars").clientWidth;
+    if (!w) return;                            // hidden view measures zero
+    if (Math.abs(w - lastPlotW) < 2) return;   // guard against an observer loop
+    lastPlotW = w;
+    if (rt) clearTimeout(rt);
+    rt = setTimeout(renderCharts, 120);
+  }
+  if (window.ResizeObserver){
+    var ro = new ResizeObserver(onPlotResize);
+    ro.observe(document.getElementById("plotBars"));
+    ro.observe(document.getElementById("plotFactor"));
+  } else {
+    window.addEventListener("resize", onPlotResize);
+  }
+
+  /* ---------------- sample ---------------- */
+  function sampleEntries(){
+    var out = [], base = ymOf(new Date());
+    var plan = [
+      { inc: [["Salary", 4200], ["Freelance", 480]], exp: [["Housing", 1450], ["Food & groceries", 610], ["Transport", 185], ["Utilities", 165], ["Subscriptions", 58], ["Dining & fun", 240], ["Health", 95]] },
+      { inc: [["Salary", 4200], ["Freelance", 260]], exp: [["Housing", 1450], ["Food & groceries", 575], ["Transport", 210], ["Utilities", 148], ["Subscriptions", 58], ["Dining & fun", 305], ["Shopping", 190]] },
+      { inc: [["Salary", 4200]], exp: [["Housing", 1450], ["Food & groceries", 640], ["Transport", 172], ["Utilities", 205], ["Subscriptions", 58], ["Dining & fun", 265], ["Travel", 820], ["Health", 120]] },
+      { inc: [["Salary", 4400], ["Freelance", 720]], exp: [["Housing", 1450], ["Food & groceries", 590], ["Transport", 168], ["Utilities", 142], ["Subscriptions", 64], ["Dining & fun", 220], ["Insurance", 210]] },
+      { inc: [["Salary", 4400], ["Investments", 165]], exp: [["Housing", 1450], ["Food & groceries", 605], ["Transport", 195], ["Utilities", 138], ["Subscriptions", 64], ["Dining & fun", 275], ["Shopping", 145]] },
+      { inc: [["Salary", 4400], ["Freelance", 950], ["Investments", 172]], exp: [["Housing", 1450], ["Food & groceries", 560], ["Transport", 160], ["Utilities", 145], ["Subscriptions", 64], ["Dining & fun", 235], ["Health", 88]] }
+    ];
+    for (var i=0;i<plan.length;i++){
+      var m = addMonths(base, -(plan.length - 1 - i));
+      plan[i].inc.forEach(function(p, k){
+        out.push(cleanEntry({ id: uid(), date: m + "-" + pad(k === 0 ? 1 : 14), type: "income", category: p[0], note: "Example", amount: p[1], updatedAt: stamp() }));
+      });
+      plan[i].exp.forEach(function(p, k){
+        out.push(cleanEntry({ id: uid(), date: m + "-" + pad(Math.min(28, 2 + k*3)), type: "expense", category: p[0], note: "Example", amount: p[1], updatedAt: stamp() }));
+      });
+    }
+    return out;
+  }
+
+  /* ---------------- boot ---------------- */
+  document.getElementById("footText").textContent = HOSTED
+    ? "Entries are saved to this page's private database, so they show up wherever you open this link signed in to Claude. To carry them to the iPhone app, use Move data between devices on the Entries tab."
+    : "Entries are stored on this iPhone, inside the app. They stay here until you delete them. To carry them to or from the Claude page, or to keep a backup, use Move data between devices on the Entries tab.";
+  buildFormatters();
+  applyView();
+  applyScope();
+  resetForm();
+  renderAll();
+  updateSaveStatus();
+  connect();
+
+  if (!HOSTED){
+    // Offline support and a request that the OS keep this app's storage.
+    if ("serviceWorker" in navigator && window.isSecureContext && /^https?:$/.test(location.protocol)){
+      window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+      // When a new version installs, switch to it once instead of waiting for the next launch.
+      var hadController = !!navigator.serviceWorker.controller, reloaded = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function(){
+        if (!hadController || reloaded) return;
+        reloaded = true;
+        if (transferEl.hidden && !editingId && !document.getElementById("fAmt").value) window.location.reload();
+      });
+    }
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){});
+  }
+})();
+</script>
+</body>
+</html>
